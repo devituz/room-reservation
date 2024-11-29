@@ -43,7 +43,7 @@ $(document).ready(function () {
                 date: "2024-11-23"
             }
         ],
-        eventRender: function (event, element) {
+        eventClick: function (event, element) {
             // Faqat roomNumber'ni ko'rsatish va title'ni yashirish
             if (event.roomNumber) {
                 element.find('.fc-title').html('<small>Room: ' + event.roomNumber + '</small>');

@@ -126,23 +126,38 @@
 </div>
 
 
-<div id="modal-date-event-id-details" class="modal fade" role="dialog">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="kt_modal_view_event" tabindex="-1" data-bs-focus="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-650px">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modal-event-title"></h5>
+            <div class="modal-header border-0 justify-content-end">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <p id="modal-event-description"></p>
-                <p id="modal-event-room"></p>
-                <p id="modal-event-time"></p>
-                <p id="modal-event-starttime"></p>
-                <p id="modal-event-endtime"></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+            <div class="modal-body pt-0 pb-20 px-lg-17">
+                <div class="d-flex">
+                    <div class="mb-9">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="fs-3 fw-bold me-3" data-kt-calendar="event_name"></span>
+                            <span class="badge badge-light-success" data-kt-calendar="all_day"></span>
+                        </div>
+                        <div class="fs-6" data-kt-calendar="event_description"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-2">
+                    <span class="bullet bullet-dot h-10px w-10px bg-success ms-2 me-7"></span>
+                    <div class="fs-6"><span class="fw-bold">Starts</span> <span data-kt-calendar="event_start_date"></span></div>
+                </div>
+
+                <div class="d-flex align-items-center mb-9">
+                    <span class="bullet bullet-dot h-10px w-10px bg-danger ms-2 me-7"></span>
+                    <div class="fs-6"><span class="fw-bold">Ends</span> <span data-kt-calendar="event_end_date"></span></div>
+                </div>
+
+                <div class="d-flex align-items-center">
+                    <div class="fs-6" data-kt-calendar="event_location"></div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
