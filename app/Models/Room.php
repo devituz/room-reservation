@@ -11,6 +11,7 @@ class Room extends Model
     use HasFactory;
 
     protected $fillable = ['name', 'number', 'building_id'];
+
     public function getFormattedCreatedAtAttribute(): string
     {
         return Carbon::parse($this->created_at)
@@ -19,10 +20,14 @@ class Room extends Model
     }
 
 
-
     public function building()
     {
         return $this->belongsTo(Building::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 
 }

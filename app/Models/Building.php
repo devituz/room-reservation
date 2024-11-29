@@ -25,5 +25,9 @@ class Building extends Model
     {
         return $this->hasMany(Room::class);
     }
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
 
 }
