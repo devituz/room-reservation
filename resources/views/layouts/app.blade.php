@@ -20,6 +20,29 @@
 
 
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const modalId = "kt_modal_view_event";
+        const cssHref = "{{ asset('assets/css/style.css') }}";
+
+        const modalElement = document.getElementById(modalId);
+        const cssLink = Array.from(document.querySelectorAll('link')).find(link => link.href.includes(cssHref));
+
+
+        modalElement.addEventListener("show.bs.modal", () => {
+            if (cssLink) {
+                cssLink.disabled = true;
+            }
+        });
+
+        modalElement.addEventListener("hidden.bs.modal", () => {
+            if (cssLink) {
+                cssLink.disabled = false; // CSS faylni yoqish
+            }
+        });
+    });
+
+</script>
 
 <script src="{{asset('assets/calendar/plugins.bundle.js')}}"></script>
 <script src="{{asset('assets/calendar/scripts.bundle.js')}}"></script>

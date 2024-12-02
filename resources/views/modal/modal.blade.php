@@ -5,9 +5,6 @@
             <form id="add-event">
                 <div class="modal-body">
                     <h4 class="text-center">Add Event Detail</h4>
-
-
-
                     <!-- Event Date Picker -->
                     <div class="form-group">
                         <label for="event-date">Event Date</label>
@@ -30,8 +27,7 @@
                         <label for="event-type">Select the building</label>
                         <select class="form-control" name="event_type" id="event-type" required>
                             <option value="" disabled selected>Select the building</option>
-                            <option value="Type 1">UCE</option>
-                            <option value="Type 2">MATH</option>
+                            <!-- JavaScript orqali dynamically buildings qo'shiladi -->
                         </select>
                     </div>
                 </div>
@@ -46,8 +42,6 @@
     </div>
 </div>
 
-
-
 <div id="modal-view-event-details" class="modal fade" tabindex="-1" aria-labelledby="modal2Label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -56,16 +50,8 @@
                 <p class="text-center mb-4">Please confirm the details and proceed by selecting a room.</p>
 
                 <!-- Room buttons -->
-                <div class="d-flex flex-wrap justify-content-center">
-                    <button class="btn btn-outline-primary btn-lg mb-2 room-btn" id="room1" onclick="selectRoom(this)">Room 1</button>
-                    <button class="btn btn-outline-primary btn-lg mb-2 room-btn" id="room2" onclick="selectRoom(this)">Room 2</button>
-                    <button class="btn btn-outline-primary btn-lg mb-2 room-btn" id="room3" onclick="selectRoom(this)">Room 3</button>
-                    <button class="btn btn-outline-primary btn-lg mb-2 room-btn" id="room4" onclick="selectRoom(this)">Room 4</button>
-                    <button class="btn btn-outline-primary btn-lg mb-2 room-btn" id="room5" onclick="selectRoom(this)">Room 5</button>
-                    <button class="btn btn-outline-primary btn-lg mb-2 room-btn" id="room6" onclick="selectRoom(this)">Room 6</button>
-                    <button class="btn btn-outline-primary btn-lg mb-2 room-btn" id="room7" onclick="selectRoom(this)">Room 7</button>
-                    <button class="btn btn-outline-primary btn-lg mb-2 room-btn" id="room8" onclick="selectRoom(this)">Room 8</button>
-                    <button class="btn btn-outline-primary btn-lg mb-2 room-btn" id="room9" onclick="selectRoom(this)">Room 9</button>
+                <div id="room-buttons-container" class="d-flex flex-wrap justify-content-center">
+                    <!-- Room buttons will be populated here -->
                 </div>
 
             </div>
@@ -78,32 +64,36 @@
     </div>
 </div>
 
-
 <!-- Modal for final step -->
 <div id="modal-view-event-final" class="modal fade" tabindex="-1" aria-labelledby="modal3Label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-body">
                 <h4 class="text-center">Add Event Detail</h4>
+
                 <div class="form-group">
-                    <label>Fullname</label>
-                    <input type="text" class="form-control" name="fullname">
+                    <label for="fullname">Fullname</label>
+                    <input type="text" class="form-control" id="fullname" name="fullname">
                 </div>
+
                 <div class="form-group">
-                    <label>Phone Number</label>
-                    <input type="tel" class="form-control" name="number">
+                    <label for="phone-number">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone-number" name="number">
                 </div>
+
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" class="form-control" name="email">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email">
                 </div>
+
                 <div class="form-group">
-                    <label>Event name</label>
-                    <input type="text" class="form-control" name="event_name">
+                    <label for="event-name">Event name</label>
+                    <input type="text" class="form-control" id="event-name" name="event_name">
                 </div>
+
                 <div class="form-group">
-                    <label>Event Description</label>
-                    <textarea class="form-control" name="edesc"></textarea>
+                    <label for="event-desc">Event Description</label>
+                    <textarea class="form-control" id="event-desc" name="edesc"></textarea>
                 </div>
 
                 <!-- CAPTCHA -->
@@ -124,6 +114,7 @@
         </div>
     </div>
 </div>
+
 
 
 <div class="modal fade" id="kt_modal_view_event" tabindex="-1" data-bs-focus="false" aria-hidden="true">

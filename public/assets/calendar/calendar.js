@@ -8,28 +8,35 @@ $(document).ready(function () {
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
-        events: [
-            {
-                title: 'Meeting',
-                start: '2024-11-25T10:30:00',
-                end: '2024-11-25T12:30:00',
-                description: 'Project meeting with the team.',
-                location: 'Conference Room A',
-            },
-            {
-                title: 'Team Lunch',
-                start: '2024-11-26T13:00:00',
-                end: '2024-11-30T15:00:00',
-                description: 'Team lunch at the local restaurant.',
-                location: 'Restaurant X',
-            }
-        ],
+        events: function(info, successCallback, failureCallback) {
+            $.ajax({
+                url: 'http://127.0.0.1:8080/api/notifications', // Your API endpoint to get events
+                method: 'GET',
+                success: function(response) {
+                    // Format events from the response and pass them to FullCalendar
+                    var events = response.events.map(function(event) {
+                        return {
+                            title: event.title,
+                            start: event.start,
+                            end: event.end,
+                            description: event.description || 'No description',
+                            location: event.location || 'No location',
+                            color: '#b81212'
+                        };
+                    });
+                    successCallback(events);
+                },
+                error: function() {
+                    failureCallback('Failed to load events.');
+                }
+            });
+        },
         eventClick: function (info) {
-            // Modalni ochish
+            // Open modal to view event details
             const modal = new bootstrap.Modal(document.getElementById('kt_modal_view_event'));
             modal.show();
 
-            // Modalga ma'lumotlarni o'rnatish
+            // Set the modal content with the event's details
             document.querySelector('[data-kt-calendar="event_name"]').textContent = info.event.title;
             document.querySelector('[data-kt-calendar="event_description"]').textContent = info.event.extendedProps.description || 'No description';
             document.querySelector('[data-kt-calendar="event_location"]').textContent = info.event.extendedProps.location || 'No location';
@@ -40,33 +47,33 @@ $(document).ready(function () {
             document.querySelector('[data-kt-calendar="all_day"]').textContent = info.event.allDay ? 'All Day' : '';
         },
         dateClick: function (info) {
-            // Sana ustiga bosilganda yangi tadbir yaratish formasi modalini ochish
+            // Open modal to create a new event on date click
             const modal = new bootstrap.Modal(document.getElementById('kt_modal_create_event'));
             modal.show();
 
-            // Formdagi input maydonlarni tozalash va sana ma'lumotini qo'shish
-            $('#event-date').val(info.dateStr); // Bosilgan sanani formga joylashtirish
+            // Fill the form with the clicked date
+            $('#event-date').val(info.dateStr);
         }
     });
 
-    // Kalendarni render qilish
+    // Render the calendar
     calendar.render();
 
-    // Sana formatlash funktsiyasi (Uzbekiston vaqtida)
+    // Format date function (in Uzbekistan time)
     function formatDate(date) {
-        return new Intl.DateTimeFormat('en-GB', { // 'en-GB' formatda, 24 soatlik format
+        return new Intl.DateTimeFormat('en-GB', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
-            hour12: false, // 24 soatlik format
-            timeZone: 'Asia/Tashkent' // O'zbekiston vaqti (UZT)
+            hour12: false,
+            timeZone: 'Asia/Tashkent' // Uzbekistan time
         }).format(date);
     }
 
-    // Sana tanlash uchun Datepicker'ni sozlash
+    // Datepicker settings for creating events
     $('.datetimepicker').datepicker({
         timepicker: true,
         language: 'en',
@@ -75,29 +82,28 @@ $(document).ready(function () {
         multipleDatesSeparator: " - "
     });
 
-    // Forma topshirilganda yangi tadbirni qo'shish
+    // Handle form submission to add a new event
     $("#add-event").submit(function (e) {
-        e.preventDefault(); // Standart forma yuborishni to'xtatish
+        e.preventDefault(); // Prevent default form submission
 
-        // Input maydonlardan ma'lumotlarni olish
-        var title = $('#event-title').val(); // Tadbir nomi
-        var date = $('#event-date').val(); // Tadbir sanasi va vaqti
+        // Get form data
+        var title = $('#event-title').val();
+        var date = $('#event-date').val();
 
-        // FullCalendar'ga yangi tadbirni qo'shish
+        // Add the new event to FullCalendar
         calendar.addEvent({
             title: title,
             start: date,
-            allDay: false
+            allDay: false,
         });
 
-        // Modalni yopish
+        // Close the modal
         $('#kt_modal_create_event').modal('hide');
 
-        // Formani tozalash
+        // Reset the form
         $('#add-event')[0].reset();
     });
 });
-
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -129,15 +135,61 @@ document.addEventListener("DOMContentLoaded", function () {
     eventEndTimeInput.addEventListener("input", checkInputs);
     eventTypeInput.addEventListener("change", checkInputs); // Checking event type selection
 
+
+    function loadRoomsByBuilding(buildingId) {
+
+
+        fetch('http://127.0.0.1:8080/api/get-rooms-by-building', {  // POST request to fetch rooms
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: buildingId })
+        })
+            .then(response => response.json())
+            .then(data => {
+
+
+                const roomButtonsContainer = document.getElementById('room-buttons-container');
+                roomButtonsContainer.innerHTML = '';  // Clear any existing room buttons
+
+                // Populate the room buttons dynamically
+                data.forEach(room => {
+                    const button = document.createElement('button');
+                    button.classList.add('btn', 'btn-outline-primary', 'btn-lg', 'mb-2', 'room-btn');
+                    button.id = `room${room.id}`;
+                    button.textContent = room.name;  // Room name
+                    button.onclick = function() { selectRoom(button); };  // Attach room selection function
+                    roomButtonsContainer.appendChild(button);
+                });
+            })
+
+            .catch(error => console.error('Error loading rooms:', error));
+    }
+
     // Modal 1: Next tugmasi bosilganda
+// Modal 1: Next button to proceed to Modal 2
     document.getElementById("next-to-modal-2").addEventListener("click", function () {
-        // Modal 1dagi formdagi inputlarni tekshirish
-        var form = document.getElementById("add-event");
-        if (form.checkValidity()) {
-            $('#kt_modal_create_event').modal('hide'); // Modal 1 yopiladi
-            $('#modal-view-event-details').modal('show'); // Modal 2 ochiladi
+        const buildingSelect = document.getElementById('event-type');
+        const selectedBuildingId = buildingSelect.value;  // Get selected building ID
+
+        const eventDate = document.getElementById("event-date").value; // Sana
+        const eventStartTime = document.getElementById("event-start-time").value; // Boshlanish vaqti
+        const eventEndTime = document.getElementById("event-end-time").value; // Tugash vaqti
+        const eventType = document.getElementById("event-type").value; // Tanlangan bino
+
+        // Konsolga chiqarish
+        console.log("Event Date:", eventDate);
+        console.log("Event Start Time:", eventStartTime);
+        console.log("Event End Time:", eventEndTime);
+        console.log("Selected Building (Event Type):", eventType);
+
+        if (selectedBuildingId) {
+            loadRoomsByBuilding(selectedBuildingId);  // Load rooms based on the selected building
+            $('#kt_modal_create_event').modal('hide');  // Close Modal 1
+            $('#modal-view-event-details').modal('show');  // Open Modal 2
         } else {
-            form.reportValidity(); // Foydalanuvchiga to'ldirishni eslatish
+            alert("Please select a building before proceeding.");
         }
     });
 
@@ -149,6 +201,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Modal 2: Next tugmasi bosilganda
     document.getElementById("next-to-modal-3").addEventListener("click", function () {
+
+
+
+
         $('#modal-view-event-details').modal('hide'); // Modal 2 yopiladi
         $('#modal-view-event-final').modal('show'); // Modal 3 ochiladi
     });
@@ -161,8 +217,134 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Modal 3: Submit tugmasi bosilganda
     document.getElementById("finish-modal").addEventListener("click", function () {
-        $('#modal-view-event-final').modal('hide'); // Modal 3 yopiladi
-        // alert("Event successfully added!");
+
+        // Modal 1 ma'lumotlarini olish
+        const eventDate = document.getElementById("event-date").value;
+        const eventStartTime = document.getElementById("event-start-time").value;
+        const eventEndTime = document.getElementById("event-end-time").value;
+        const buildingSelect = document.getElementById('event-type');
+        const selectedBuildingId = buildingSelect.value; // Building ID
+        const selectedBuildingText = buildingSelect.options[buildingSelect.selectedIndex].text; // Building Name
+
+        // Modal 2-dagi tanlangan xona (room.id) ni olish
+        const selectedRoomButton = document.querySelector('.room-btn.selected'); // "selected" class bilan tanlangan xona
+        const selectedRoomId = selectedRoomButton ? selectedRoomButton.id.replace('room', '') : null; // room.id
+
+        //  Modal 3-dagi ni olish
+        const eventFullName = document.getElementById("fullname").value;
+        const eventNumber = document.getElementById("phone-number").value;
+        const eventEmail = document.getElementById("email").value;
+        const eventEventName= document.getElementById("event-name").value;
+        const eventEventDesc= document.getElementById("event-desc").value;
+
+        // JSON formatiga to'plash
+        const eventData = {
+            event_date: eventDate,
+            event_start_time: eventStartTime,
+            event_end_time: eventEndTime,
+            building_id: selectedBuildingId,
+            room_id: selectedRoomId,
+            fullname: eventFullName,
+            phone_number: eventNumber,
+            email: eventEmail,
+            event_name: eventEventName,
+            event_description: eventEventDesc
+        };
+
+        // Konsolga chiqarish
+        console.log("Event Data (JSON):", JSON.stringify(eventData));
+
+        // API-ga POST so'rov yuborish
+        fetch('http://127.0.0.1:8080/api/notifications', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(eventData)
+        })
+            .then(response => {
+                if (!response.ok) { // Check if the response status is not OK
+                    if (response.status === 422) {
+                        response.json().then(data => {
+                            const errorMessage = data.error || 'There was an error adding the event!';
+
+                            Swal.fire({
+                                title: 'Error!',
+                                text: errorMessage,  // Display the error message
+                                icon: 'error'
+                            }).then(() => {
+                                // Close the modal
+                                document.getElementById('modal-view-event-final').style.display = 'none';
+                                // Clear the form
+                                document.querySelectorAll('#modal-view-event-final .form-control').forEach(input => input.value = '');
+                                checkInputs(); // Revalidate inputs
+                                location.reload(); // Refresh the page
+                            });
+                        });
+
+                    }
+                }
+                if (response.status === 201) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Your data has been submitted.',
+                        icon: 'success'
+                    }).then(() => {
+                        // Close the modal
+                        document.getElementById('modal-view-event-final').style.display = 'none';
+                        // Clear the form
+                        document.querySelectorAll('#modal-view-event-final .form-control').forEach(input => input.value = '');
+                        checkInputs(); // Revalidate inputs
+                        location.reload(); // Refresh the page
+
+                    });                }
+
+            }).catch(error => {
+                console.error('Error:', error);
+                // Handle other errors
+                if (error.message.includes('HTTP status')) {
+                    alert(`Error: ${error.message}`);
+                } else {
+                    alert("There was an error adding the event!");
+                }
+            });
+
+
+
+
+    });
+
+});
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Buildinglarni APIdan yuklash funksiyasi
+    function loadBuildings() {
+        fetch('http://127.0.0.1:8080/api/buildings')  // API URL
+            .then(response => response.json())  // JSON formatida javob olish
+            .then(data => {
+                const eventTypeSelect = document.getElementById('event-type');
+
+                // Bo'sh optionni olib tashlash va yangi optionslarni qo'shish
+                eventTypeSelect.innerHTML = '<option value="" disabled selected>Select the building</option>';
+
+                // Har bir building uchun option qo'shish
+                data.forEach(building => {
+                    const option = document.createElement('option');
+                    option.value = building.id;  // Building ID
+                    option.textContent = building.name;  // Building nomi
+                    eventTypeSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading buildings:', error);
+            });
+    }
+
+    // Modal ochilganida buildingsni yuklash
+    const modal = document.getElementById('kt_modal_create_event');
+    modal.addEventListener('show.bs.modal', function () {
+        loadBuildings();
     });
 });
 
@@ -173,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // End time input
     var endTimeInput = document.getElementById('event-end-time');
 
-    // 24 soatli formatni tekshirish va sozlash
+
     function validateTime(input) {
         var time = input.value;
         var regex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
@@ -220,13 +402,6 @@ function selectRoom(button) {
 // Initially, the "Next" button is hidden
 document.getElementById("next-to-modal-3").style.display = "none";
 
-
-
-
-
-
-
-// Function to check if all inputs are filled
 function checkInputs() {
     const inputs = document.querySelectorAll('#modal-view-event-final .form-control:not(#captcha-input)');
     let allFilled = true;
@@ -260,7 +435,6 @@ function generateCaptcha() {
     correctAnswer = num1 + num2;
 }
 
-// Check if CAPTCHA answer is correct
 function checkCaptcha() {
     const userAnswer = document.getElementById('captcha-input').value.trim();
     const submitButton = document.getElementById('finish-modal');
@@ -287,33 +461,16 @@ function selectRoom(button) {
 }
 
 
-// SweetAlert for Submit button
-document.getElementById('finish-modal').addEventListener('click', () => {
-    Swal.fire({
-        title: 'Success!',
-        text: 'Your data has been submitted.',
-        icon: 'success'
-    }).then(() => {
-        // Modalni yopish
-        document.getElementById('modal-view-event-final').style.display = 'none';
 
-        // Formani tozalash
-        document.querySelectorAll('#modal-view-event-final .form-control').forEach(input => input.value = '');
-
-        // Holatni qayta tekshirish uchun
-        checkInputs(); // Ensures that Next button visibility is updated
-
-        // Refresh the browser
-        window.location.reload(); // This will reload the page
-    });
-});
-
-// Event listeners
 document.querySelectorAll('#modal-view-event-final .form-control:not(#captcha-input)').forEach(input => {
     input.addEventListener('input', checkInputs);
 });
 
 document.getElementById('captcha-input').addEventListener('input', checkCaptcha);
 
-// Initialize state
 checkInputs();
+
+
+
+
+

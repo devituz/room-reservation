@@ -69,6 +69,7 @@ class NotificationResource extends Resource
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table
+            ->defaultSort('created_at', 'desc') // Sukut bo‘yicha tartiblash
             ->columns([
                 TextColumn::make('event_date')->label('Event Date')->sortable(),
                 TextColumn::make('event_start_time')->label('Start Time'),
@@ -79,6 +80,7 @@ class NotificationResource extends Resource
                 TextColumn::make('phone_number')->label('Phone Number'),
                 TextColumn::make('email')->label('Email'),
                 TextColumn::make('event_name')->label('Event Name'),
+                TextColumn::make('created_at')->label('Created At'),
                 BadgeColumn::make('is_approved')
                     ->label('Approval Status')
                     ->getStateUsing(fn($record) => ucfirst($record->is_approved)) // Enum qiymatlarini ko'rsatish
