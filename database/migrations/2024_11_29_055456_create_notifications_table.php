@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('event_name');
             $table->text('event_description')->nullable();
             $table->enum('is_approved', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->enum('is_color', ['red', 'yellow', 'green'])->default('green');
             $table->timestamps();
         });
     }

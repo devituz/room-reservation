@@ -21,6 +21,7 @@ class Notification extends Model
         'event_name',
         'event_description',
         'is_approved',
+        'is_color'
     ];
 
 

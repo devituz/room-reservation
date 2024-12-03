@@ -11,14 +11,15 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TimePicker;
-use Filament\Forms\Components\Toggle;
+
 use Filament\Forms\Components\Select;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BooleanColumn;
+
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 class NotificationResource extends Resource
 {
@@ -69,8 +70,9 @@ class NotificationResource extends Resource
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table
-            ->defaultSort('created_at', 'desc') // Sukut bo‘yicha tartiblash
+            ->defaultSort('created_at', 'desc')
             ->columns([
+                TextColumn::make('is_color')->label('Color')->sortable(),
                 TextColumn::make('event_date')->label('Event Date')->sortable(),
                 TextColumn::make('event_start_time')->label('Start Time'),
                 TextColumn::make('event_end_time')->label('End Time'),
@@ -80,38 +82,60 @@ class NotificationResource extends Resource
                 TextColumn::make('phone_number')->label('Phone Number'),
                 TextColumn::make('email')->label('Email'),
                 TextColumn::make('event_name')->label('Event Name'),
+                TextColumn::make('event_description')
+                    ->label('Event Description')
+                    ->getStateUsing(fn($record) => Str::limit($record->event_description, 20, '...'))  // Qisqartirish
+                    ->sortable(),
+
                 TextColumn::make('created_at')->label('Created At'),
                 BadgeColumn::make('is_approved')
                     ->label('Approval Status')
-                    ->getStateUsing(fn($record) => ucfirst($record->is_approved)) // Enum qiymatlarini ko'rsatish
+                    ->getStateUsing(fn($record) => ucfirst($record->is_approved))
                     ->colors([
                         'pending' => 'warning',
                         'approved' => 'success',
                         'rejected' => 'danger',
                     ])
-
-            ])
-            ->filters([
-                //
-
             ])
             ->actions([
-
                 Action::make('approve')
                     ->label('Approve')
                     ->color('success')
                     ->icon('heroicon-o-check')
-                    ->action(function ($record) {
-                        $record->update(['is_approved' => 'approved']);
-                    }),
+                    ->modalWidth('sm') // Set the modal width to small
+                    ->form([
+                        Select::make('is_color')
+                            ->label('Select Color')
+                            ->options([
+                                'red' => 'Red',
+                                'yellow' => 'Yellow',
+                                'green' => 'Green',
+                            ])
+                            ->required()
+                            ->default('green'),
+                    ])
+                    ->action(function ($record, $data) {
+                        // Update both 'is_approved' and 'is_color' fields
+                        $record->update([
+                            'is_approved' => 'approved',
+                            'is_color' => $data['is_color'],
+                        ]);
+                    })
+                    // Hide approve button if already approved or rejected
+                    ->visible(fn ($record) => $record->is_approved === 'pending'),
+
                 Action::make('reject')
                     ->label('Reject')
                     ->color('danger')
                     ->icon('heroicon-o-x-mark')
                     ->action(function ($record) {
                         $record->update(['is_approved' => 'rejected']);
-                    }),
+                    })
+                    // Hide reject button if already approved or rejected
+                    ->visible(fn ($record) => $record->is_approved === 'pending'),
+
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -119,6 +143,7 @@ class NotificationResource extends Resource
                 ]),
             ]);
     }
+
 
     public static function getRelations(): array
     {

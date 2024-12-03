@@ -8,25 +8,25 @@ $(document).ready(function () {
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
-        events: function(info, successCallback, failureCallback) {
+        events: function (info, successCallback, failureCallback) {
             $.ajax({
-                url: 'http://127.0.0.1:8080/api/notifications', // Your API endpoint to get events
+                url: 'http://172.24.25.252:8080/api/notifications', // Your API endpoint to get events
                 method: 'GET',
-                success: function(response) {
+                success: function (response) {
                     // Format events from the response and pass them to FullCalendar
-                    var events = response.events.map(function(event) {
+                    var events = response.events.map(function (event) {
                         return {
                             title: event.title,
                             start: event.start,
                             end: event.end,
                             description: event.description || 'No description',
                             location: event.location || 'No location',
-                            color: '#b81212'
+                            color: event.color
                         };
                     });
                     successCallback(events);
                 },
-                error: function() {
+                error: function () {
                     failureCallback('Failed to load events.');
                 }
             });
@@ -105,7 +105,6 @@ $(document).ready(function () {
     });
 });
 
-
 document.addEventListener("DOMContentLoaded", function () {
     // Modal 1dagi inputlar
     const eventDateInput = document.getElementById("event-date");
@@ -134,32 +133,30 @@ document.addEventListener("DOMContentLoaded", function () {
     eventStartTimeInput.addEventListener("input", checkInputs);
     eventEndTimeInput.addEventListener("input", checkInputs);
     eventTypeInput.addEventListener("change", checkInputs); // Checking event type selection
-
-
     function loadRoomsByBuilding(buildingId) {
 
 
-        fetch('http://127.0.0.1:8080/api/get-rooms-by-building', {  // POST request to fetch rooms
+        fetch('http://172.24.25.252:8080/api/get-rooms-by-building', {  // POST request to fetch rooms
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id: buildingId })
+            body: JSON.stringify({id: buildingId})
         })
             .then(response => response.json())
             .then(data => {
 
-
                 const roomButtonsContainer = document.getElementById('room-buttons-container');
                 roomButtonsContainer.innerHTML = '';  // Clear any existing room buttons
-
                 // Populate the room buttons dynamically
                 data.forEach(room => {
                     const button = document.createElement('button');
                     button.classList.add('btn', 'btn-outline-primary', 'btn-lg', 'mb-2', 'room-btn');
                     button.id = `room${room.id}`;
                     button.textContent = room.name;  // Room name
-                    button.onclick = function() { selectRoom(button); };  // Attach room selection function
+                    button.onclick = function () {
+                        selectRoom(button);
+                    };  // Attach room selection function
                     roomButtonsContainer.appendChild(button);
                 });
             })
@@ -202,9 +199,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // Modal 2: Next tugmasi bosilganda
     document.getElementById("next-to-modal-3").addEventListener("click", function () {
 
-
-
-
         $('#modal-view-event-details').modal('hide'); // Modal 2 yopiladi
         $('#modal-view-event-final').modal('show'); // Modal 3 ochiladi
     });
@@ -226,6 +220,19 @@ document.addEventListener("DOMContentLoaded", function () {
         const selectedBuildingId = buildingSelect.value; // Building ID
         const selectedBuildingText = buildingSelect.options[buildingSelect.selectedIndex].text; // Building Name
 
+
+        document.getElementById('finish-modal').style.display = 'none';
+        document.getElementById('back-to-modal-2').style.display = 'none';
+        document.getElementById('close-modal').style.display = 'none';
+        document.querySelector('[data-bs-dismiss="modal"]').style.display = 'none';
+
+        document.getElementById('loading-message').style.display = 'block';
+
+        setTimeout(function () {
+            document.getElementById('loading-message').style.display = 'none';
+
+        }, 3000); // Simulating 3 seconds loading time
+
         // Modal 2-dagi tanlangan xona (room.id) ni olish
         const selectedRoomButton = document.querySelector('.room-btn.selected'); // "selected" class bilan tanlangan xona
         const selectedRoomId = selectedRoomButton ? selectedRoomButton.id.replace('room', '') : null; // room.id
@@ -234,8 +241,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const eventFullName = document.getElementById("fullname").value;
         const eventNumber = document.getElementById("phone-number").value;
         const eventEmail = document.getElementById("email").value;
-        const eventEventName= document.getElementById("event-name").value;
-        const eventEventDesc= document.getElementById("event-desc").value;
+        const eventEventName = document.getElementById("event-name").value;
+        const eventEventDesc = document.getElementById("event-desc").value;
 
         // JSON formatiga to'plash
         const eventData = {
@@ -251,11 +258,11 @@ document.addEventListener("DOMContentLoaded", function () {
             event_description: eventEventDesc
         };
 
-        // Konsolga chiqarish
+
         console.log("Event Data (JSON):", JSON.stringify(eventData));
 
-        // API-ga POST so'rov yuborish
-        fetch('http://127.0.0.1:8080/api/notifications', {
+
+        fetch('http://172.24.25.252:8080/api/notifications', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -263,22 +270,23 @@ document.addEventListener("DOMContentLoaded", function () {
             body: JSON.stringify(eventData)
         })
             .then(response => {
-                if (!response.ok) { // Check if the response status is not OK
+                if (!response.ok) {
                     if (response.status === 422) {
                         response.json().then(data => {
                             const errorMessage = data.error || 'There was an error adding the event!';
 
                             Swal.fire({
                                 title: 'Error!',
-                                text: errorMessage,  // Display the error message
+                                text: errorMessage,
                                 icon: 'error'
                             }).then(() => {
-                                // Close the modal
                                 document.getElementById('modal-view-event-final').style.display = 'none';
-                                // Clear the form
+
                                 document.querySelectorAll('#modal-view-event-final .form-control').forEach(input => input.value = '');
                                 checkInputs(); // Revalidate inputs
-                                location.reload(); // Refresh the page
+                                document.getElementById("event-start-time").value = '';
+                                document.getElementById("event-end-time").value = '';
+                                location.reload();
                             });
                         });
 
@@ -290,28 +298,23 @@ document.addEventListener("DOMContentLoaded", function () {
                         text: 'Your data has been submitted.',
                         icon: 'success'
                     }).then(() => {
-                        // Close the modal
                         document.getElementById('modal-view-event-final').style.display = 'none';
-                        // Clear the form
                         document.querySelectorAll('#modal-view-event-final .form-control').forEach(input => input.value = '');
-                        checkInputs(); // Revalidate inputs
-                        location.reload(); // Refresh the page
+                        checkInputs();
+                        document.getElementById("event-start-time").value = '';
+                        document.getElementById("event-end-time").value = '';
+                        location.reload();
 
-                    });                }
-
-            }).catch(error => {
-                console.error('Error:', error);
-                // Handle other errors
-                if (error.message.includes('HTTP status')) {
-                    alert(`Error: ${error.message}`);
-                } else {
-                    alert("There was an error adding the event!");
+                    });
                 }
-            });
-
-
-
-
+            }).catch(error => {
+            console.error('Error:', error);
+            if (error.message.includes('HTTP status')) {
+                alert(`Error: ${error.message}`);
+            } else {
+                alert("There was an error adding the event!");
+            }
+        });
     });
 
 });
@@ -320,7 +323,7 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener('DOMContentLoaded', function () {
     // Buildinglarni APIdan yuklash funksiyasi
     function loadBuildings() {
-        fetch('http://127.0.0.1:8080/api/buildings')  // API URL
+        fetch('http://172.24.25.252:8080/api/buildings')  // API URL
             .then(response => response.json())  // JSON formatida javob olish
             .then(data => {
                 const eventTypeSelect = document.getElementById('event-type');
@@ -347,7 +350,6 @@ document.addEventListener('DOMContentLoaded', function () {
         loadBuildings();
     });
 });
-
 
 document.addEventListener('DOMContentLoaded', function () {
     // Start time input
@@ -378,8 +380,6 @@ document.addEventListener('DOMContentLoaded', function () {
         validateTime(endTimeInput);
     });
 });
-
-
 
 // Define currentSelectedRoom variable
 let currentSelectedRoom = null;
@@ -427,6 +427,7 @@ function checkInputs() {
 
 // Generate random math CAPTCHA
 let correctAnswer;
+
 function generateCaptcha() {
     const num1 = Math.floor(Math.random() * 10) + 1;
     const num2 = Math.floor(Math.random() * 10) + 1;
@@ -459,8 +460,6 @@ function selectRoom(button) {
     // Show the 'Next' button
     document.getElementById('next-to-modal-3').style.display = 'inline-block';
 }
-
-
 
 document.querySelectorAll('#modal-view-event-final .form-control:not(#captcha-input)').forEach(input => {
     input.addEventListener('input', checkInputs);

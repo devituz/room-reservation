@@ -109,7 +109,10 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" id="back-to-modal-2">Back</button>
                 <button type="button" class="btn btn-primary" id="finish-modal" style="display: none;">Submit</button> <!-- Initially hidden -->
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" id="close-modal" data-bs-dismiss="modal">Close</button>
+                <div id="loading-message" style="display: none;">
+                    <span>Loading, please wait...</span>
+                </div>
             </div>
         </div>
     </div>
