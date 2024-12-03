@@ -122,9 +122,9 @@ document.addEventListener("DOMContentLoaded", function () {
             eventEndTimeInput.value &&
             eventTypeInput.value // Event type selected
         ) {
-            nextButton.style.display = "block"; // Tugma ko'rinadi
+            nextButton.style.display = "block";
         } else {
-            nextButton.style.display = "none"; // Tugma yashirin bo'ladi
+            nextButton.style.display = "none";
         }
     }
 
