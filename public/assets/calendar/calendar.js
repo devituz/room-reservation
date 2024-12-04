@@ -21,7 +21,10 @@ $(document).ready(function () {
                             end: event.end,
                             description: event.description || 'No description',
                             location: event.location || 'No location',
-                            color: event.color
+                            color: event.color,
+                            name: event.name,
+                            phone_number: event.phone_number,
+                            email: event.email,
                         };
                     });
                     successCallback(events);
@@ -45,7 +48,14 @@ $(document).ready(function () {
                 ? formatDate(info.event.end)
                 : 'Not specified';
             document.querySelector('[data-kt-calendar="all_day"]').textContent = info.event.allDay ? 'All Day' : '';
-        },
+
+
+            // Set the dynamic fields for Fullname, Phone Number, and Email
+            document.querySelector('[data-kt-calendar="fullname"]').textContent = info.event.extendedProps.name || 'No name provided';
+            document.querySelector('[data-kt-calendar="phone_number"]').textContent = info.event.extendedProps.phone_number || 'No phone number provided';
+            document.querySelector('[data-kt-calendar="email"]').textContent = info.event.extendedProps.email || 'No email provided';
+
+            },
         dateClick: function (info) {
             // Open modal to create a new event on date click
             const modal = new bootstrap.Modal(document.getElementById('kt_modal_create_event'));
@@ -158,7 +168,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         selectRoom(button);
                     };  // Attach room selection function
                     roomButtonsContainer.appendChild(button);
-                });
+                }
+
+                );
             })
 
             .catch(error => console.error('Error loading rooms:', error));

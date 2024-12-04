@@ -87,7 +87,7 @@ class NotificationResource extends Resource
                     ->getStateUsing(fn($record) => Str::limit($record->event_description, 20, '...'))  // Qisqartirish
                     ->sortable(),
 
-                TextColumn::make('created_at')->label('Created At'),
+//                TextColumn::make('created_at')->label('Created At'),
                 BadgeColumn::make('is_approved')
                     ->label('Approval Status')
                     ->getStateUsing(fn($record) => ucfirst($record->is_approved))

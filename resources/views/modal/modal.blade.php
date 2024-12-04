@@ -51,14 +51,15 @@
 
                 <!-- Room buttons -->
                 <div id="room-buttons-container" class="d-flex flex-wrap justify-content-center">
+
                     <!-- Room buttons will be populated here -->
                 </div>
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="back-to-modal-1">Back</button>
+                <button type="button" class="btn btn-primary" id="back-to-modal-1">Back</button>
                 <button type="button" class="btn btn-primary" id="next-to-modal-3" style="display: none;">Next</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -107,9 +108,9 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="back-to-modal-2">Back</button>
-                <button type="button" class="btn btn-primary" id="finish-modal" style="display: none;">Submit</button> <!-- Initially hidden -->
-                <button type="button" class="btn btn-secondary" id="close-modal" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="back-to-modal-2">Back</button>
+                <button type="button" class="btn btn-primary" id="finish-modal" style="display: none;">Submit</button>
+                <button type="button" class="btn btn-primary" id="close-modal" data-bs-dismiss="modal">Close</button>
                 <div id="loading-message" style="display: none;">
                     <span>Loading, please wait...</span>
                 </div>
@@ -139,18 +140,43 @@
                 </div>
 
                 <div class="d-flex align-items-center mb-2">
-                    <span class="bullet bullet-dot h-10px w-10px bg-success ms-2 me-7"></span>
+                    <span class="bullet bullet-dot h-10px w-10px bg-active-dark ms-2 me-7"></span>
                     <div class="fs-6"><span class="fw-bold">Starts</span> <span data-kt-calendar="event_start_date"></span></div>
                 </div>
 
-                <div class="d-flex align-items-center mb-9">
-                    <span class="bullet bullet-dot h-10px w-10px bg-danger ms-2 me-7"></span>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="bullet bullet-dot h-10px w-10px bg-active-dark ms-2 me-7"></span>
                     <div class="fs-6"><span class="fw-bold">Ends</span> <span data-kt-calendar="event_end_date"></span></div>
                 </div>
-
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center mb-9">
+                    <span class="bullet bullet-dot h-10px w-10px bg-active-dark ms-2 me-7"></span>
                     <div class="fs-6" data-kt-calendar="event_location"></div>
                 </div>
+
+                <div class="d-flex flex-column mb-9">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="fs-3 fw-bold me-3">Kim tomonidan</span>
+                    </div>
+                    <!-- Fullname -->
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="bullet bullet-dot h-10px w-10px bg-active-dark ms-2 me-7"></span>
+                        <div class="fs-6"><span class="fw-bold">Fullname:</span> <span data-kt-calendar="fullname"></span></div>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="bullet bullet-dot h-10px w-10px bg-active-dark ms-2 me-7"></span>
+                        <div class="fs-6"><span class="fw-bold">Phone Number:</span> <span data-kt-calendar="phone_number"></span></div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="d-flex align-items-center">
+                        <span class="bullet bullet-dot h-10px w-10px bg-active-dark ms-2 me-7"></span>
+                        <div class="fs-6"><span class="fw-bold">Email:</span> <span data-kt-calendar="email"></span></div>
+                    </div>
+                </div>
+
+
             </div>
         </div>
     </div>

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 
 use App\Models\Notification;
-use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
@@ -27,16 +26,20 @@ class NotificationController extends Controller
 
             return [
                 'title' => $notification->event_name, // Event title
-                'start' => Carbon::parse($notification->event_date . ' ' . $notification->event_start_time)->format('Y-m-d\TH:i:s'), // Date and time in the desired format
-                'end' => Carbon::parse($notification->event_date . ' ' . $notification->event_end_time)->format('Y-m-d\TH:i:s'), // Date and time in the desired format
-                'description' => $notification->event_description ?? 'No description', // Event description, default to 'No description' if null
-                'location' => $notification->building->name . ', ' . $notification->room->name. ', ' . $notification->room->number,
-                'color' => $color, // Add color based on 'is_color'
+                'start' => Carbon::parse($notification->event_date . ' ' . $notification->event_start_time)->format('Y-m-d\TH:i:s'),
+                'end' => Carbon::parse($notification->event_date . ' ' . $notification->event_end_time)->format('Y-m-d\TH:i:s'),
+                'description' => $notification->event_description ?? 'No description',
+                'location' => $notification->building->name . ', ' . $notification->room->name,
+                'color' => $color,
+                'name' => $notification->fullname,
+                'phone_number' => $notification->phone_number,
+                'email' => $notification->email,
+
             ];
         });
 
         return response()->json([
-            'events' => $events, // Return events in the format you need
+            'events' => $events,
         ]);
     }
 

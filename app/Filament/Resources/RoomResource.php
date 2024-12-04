@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\RoomResource\Pages;
-use App\Filament\Resources\RoomResource\RelationManagers;
 use App\Models\Room;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,8 +10,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class RoomResource extends Resource
 {
@@ -27,9 +24,6 @@ class RoomResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->label('Name'),
-                Forms\Components\TextInput::make('number')
-                    ->required()
-                    ->label('Number'),
                 Forms\Components\Select::make('building_id')
                     ->label('Building name')
                     ->relationship('building', 'name')
@@ -44,10 +38,6 @@ class RoomResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->label('Name')
-                    ->words(4)
-                    ->searchable(),
-                TextColumn::make('number')
-                    ->label('Number')
                     ->words(4)
                     ->searchable(),
                 TextColumn::make('building.name')

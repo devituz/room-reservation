@@ -10,7 +10,7 @@ class Room extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'number', 'building_id'];
+    protected $fillable = ['name', 'building_id'];
 
     public function getFormattedCreatedAtAttribute(): string
     {
