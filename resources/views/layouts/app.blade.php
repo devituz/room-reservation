@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{asset('assets/calendar/style.bundle.css')}}">
     <link rel="stylesheet" href="{{asset('assets/css/style.css')}}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
 </head>
 <body>
@@ -17,7 +18,6 @@
 @include('calendar.calendar')
 
 @include('modal.modal')
-<!-- partial -->
 
 
 </div>

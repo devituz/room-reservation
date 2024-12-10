@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BuildingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +17,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('layouts.app');
 });
+//Route::get('/modal', [BuildingController::class, 'getBuilding'])->name('modal.modal');
+Route::post('/notifications-by-date', [BuildingController::class, 'getNotificationsByDate'])->name('modal.modal');

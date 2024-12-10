@@ -125,33 +125,51 @@
 }
 
 
-
-
-
-#event-date {
-    background: none;           /* No background */
-    border: none;               /* No border */
-    outline: none;              /* No outline */
-    padding: 0;                 /* No padding */
-    padding-bottom: 15px;
-    margin: -5px 0 0 0;        /* Move 10px upwards, no margin on the sides or bottom */
-    font-size: 1.15rem;         /* Font size similar to h3 */
-    font-weight: normal;        /* Normal font weight */
-    color: inherit;             /* Use the text color of the parent */
-    cursor: text;               /* Default text cursor */
-    text-align: left;           /* Align text to the left */
-    -webkit-appearance: none;   /* Remove any native input styles (for Webkit browsers) */
-    -moz-appearance: none;      /* Remove any native input styles (for Firefox) */
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
 }
 
-/* Ensure that even on hover and focus, no changes occur */
-#event-date:hover,
-#event-date:focus {
-    background: none;           /* No background */
-    border: none;               /* No border */
-    outline: none;              /* No outline */
-    box-shadow: none;           /* No box-shadow */
-    color: inherit;             /* Keep the same text color */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group input {
+    width: 100%;
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Custom style for input fields */
+#modal-building-name, #modal-room-number, #event-date {
+    background: none;
+    border: none;
+    outline: none;
+    padding: 0;
+    padding-bottom: 15px;
+    margin: -5px 0 0 0;
+    font-size: 1.15rem;
+    font-weight: normal;
+    color: inherit;
+    cursor: text;
+    text-align: left;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+#modal-building-name:hover, #modal-building-name:focus, #modal-room-number:hover, #modal-room-number:focus, #event-date:hover, #event-date:focus {
+    background: none;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    color: inherit;
 }
 
 

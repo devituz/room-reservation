@@ -1,3 +1,23 @@
-{
-    "error": "The event end time field must be a date after event start time."
-}
+[
+    {
+        "id": "1",
+        "name": "Building 1",
+        "rooms": [
+            {
+                "room": "44",
+                "available": "12:00 - 14:00, 16:00 - 18:00",
+                "unavailable": "09:00 - 12:00, 14:00 - 16:00"
+            },
+            {
+                "room": "45",
+                "available": "09:00 - 11:00, 15:00 - 17:00",
+                "unavailable": "11:00 - 15:00"
+            },
+            {
+                "room": "46",
+                "available": "10:00 - 12:00, 14:00 - 16:00",
+                "unavailable": "09:00 - 10:00, 12:00 - 14:00, 16:00 - 18:00"
+            }
+        ]
+    }
+]

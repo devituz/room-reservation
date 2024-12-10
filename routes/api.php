@@ -21,7 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::get('/buildings', [BuildingController::class, 'getBuildings']);
-Route::get('/notifications', [NotificationController::class, 'getNotifications']);
-Route::post('/get-rooms-by-building', [BuildingController::class, 'getRoomsByBuilding']);
-Route::post('/notifications', [BuildingController::class, 'store']);
+//Route::post('notifications-by-date', [BuildingController::class, 'getNotificationsByDate']);
+Route::get('notifications', [NotificationController::class, 'getNotifications']);
+Route::get('getBuilding', [BuildingController::class, 'getBuilding']);
+Route::post('notifications', [BuildingController::class, 'store']);
