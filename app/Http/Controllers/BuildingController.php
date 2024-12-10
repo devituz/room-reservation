@@ -17,16 +17,7 @@ class BuildingController extends Controller
      */
 
 
-    public function getBuilding(Request $request)
-    {
-        // Binolarni olish
-        $buildings = Building::all();
 
-        // JSON formatida javob yuborish
-        return response()->json([
-            'buildings' => $buildings
-        ]);
-    }
 
 
     public function store(Request $request)
@@ -70,11 +61,11 @@ class BuildingController extends Controller
         if ($existingNotification) {
             // If an approved notification already exists for the given date and time, return an error response
             return response()->json([
-                'error' => 'Bu sana (' . $request->input('event_date') . ') va vaqt (' .
-                    $request->input('event_start_time') . ' - ' . $request->input('event_end_time') .
-                    ') uchun jadvalda mavjud bo\'lgan tasdiqlangan tadbir bor.',
+                'error' => 'An approved event already exists in the schedule for this date (' . $request->input('event_date') .
+                    ') and time (' . $request->input('event_start_time') . ' - ' . $request->input('event_end_time') . ').',
             ], 409); // Conflict error
         }
+
 
         // Store the validated data in the database
         try {
@@ -115,88 +106,74 @@ class BuildingController extends Controller
         // Sana parametrini olish
         $date = $request->input('date');
 
-        // Har bir bino va xonani olish, va `notifications`ni sana bo'yicha filtrlash
+        // Bino va xonalarni notifications bilan birga olish
         $buildings = Building::with(['rooms' => function ($query) use ($date) {
             $query->with(['notifications' => function ($query) use ($date) {
-                // Bu yerda notificationsni faqat event_date va is_approved = 'approved' bo'yicha filtrlash
-                $query->where('event_date', $date)
-                    ->where('is_approved', 'approved');  // is_approved = 'approved' bo'lganlarni tanlash
+                $query->whereDate('event_date', $date)->where('is_approved', 'approved');
             }]);
         }])->get();
 
-        // Formatlash
         $result = $buildings->map(function ($building) use ($date) {
             $rooms = $building->rooms->map(function ($room) use ($date) {
-                // Vaqtlarni ajratish
+                // Ishlash vaqti chegaralari
+                $startOfDay = Carbon::parse("$date 08:00:00");
+                $endOfDay = Carbon::parse("$date 20:00:00");
+
                 $available = [];
                 $unavailable = [];
 
-                // Xonada mavjud bo'lgan notifications ni tekshirib chiqamiz
-                $notifications = $room->notifications->filter(function ($notification) use ($date) {
-                    return $notification->event_date == $date;
-                });
+                // Notificationsni olish
+                $notifications = $room->notifications;
 
-                // Agar notifications mavjud bo'lmasa, barcha kunni available deb ko'rsatamiz
                 if ($notifications->isEmpty()) {
-                    $available[] = "All day available";  // Butun kun uchun available
+                    // Agar notifications yo'q bo'lsa, butun kun bo'sh
+                    $available[] = $startOfDay->format('H:i') . ' - ' . $endOfDay->format('H:i');
                 } else {
-                    // Agar notifications mavjud bo'lsa, status bo'yicha ajratamiz
-                    $unavailablePeriods = [];
-
-                    foreach ($notifications as $notification) {
-                        // Har doim is_approved = 'approved' bo'lganlarni olishni ta'minlaymiz
-                        if ($notification->is_approved == 'approved') {
-                            $unavailablePeriods[] = [
-                                'start' => $notification->event_start_time,
-                                'end' => $notification->event_end_time
-                            ];
-                        }
-                    }
-
-                    // Band vaqtlar bo'yicha available va unavailable vaqtlarni hisoblash
-                    $startOfDay = Carbon::createFromFormat('Y-m-d', $date)->setTime(8, 0);  // 08:00 AM
-                    $endOfDay = Carbon::createFromFormat('Y-m-d', $date)->setTime(20, 0);    // 08:00 PM
-
                     $previousEnd = $startOfDay;
 
-                    // Unavailable vaqtlar oralig'ini ajratib olish
-                    foreach ($unavailablePeriods as $period) {
-                        $start = Carbon::parse($period['start']);
-                        $end = Carbon::parse($period['end']);
+                    foreach ($notifications as $notification) {
+                        // event_start_time va event_end_time time formatida ishlash
+                        $start = Carbon::parse($notification->event_start_time); // Convert to Carbon instance
+                        $end = Carbon::parse($notification->event_end_time); // Convert to Carbon instance
 
-                        // Band vaqtni faqat 08:00 AM dan 08:00 PM gacha ko'rib chiqamiz
+                        // Chegaralangan vaqtni tekshirish
                         if ($start < $startOfDay) {
                             $start = $startOfDay;
                         }
-
                         if ($end > $endOfDay) {
                             $end = $endOfDay;
                         }
 
-                        // Bo'sh vaqtni available sifatida qo'shamiz
+                        // Bo'sh vaqtni aniqlash
                         if ($previousEnd < $start) {
-                            $available[] = $previousEnd->format('h:i A') . ' - ' . $start->format('h:i A');
+                            $available[] = $previousEnd->format('H:i') . ' - ' . $start->format('H:i');
                         }
 
-                        $unavailable[] = $start->format('h:i A') . ' - ' . $end->format('h:i A');
+                        // Band vaqtni qo'shish
+                        $unavailable[] = $start->format('H:i') . ' - ' . $end->format('H:i');
                         $previousEnd = $end;
                     }
 
-                    // Kun oxiriga qadar bo'sh vaqtni available sifatida qo'shish
+                    // Oxirgi band vaqt tugaganidan keyin bo'sh vaqt
                     if ($previousEnd < $endOfDay) {
-                        $available[] = $previousEnd->format('h:i A') . ' - ' . $endOfDay->format('h:i A');
+                        $available[] = $previousEnd->format('H:i') . ' - ' . $endOfDay->format('H:i');
                     }
                 }
 
-                // Har bir xona uchun mavjud va mavjud emas vaqtlar
+                $available = array_unique($available);
+                $unavailable = array_unique($unavailable);
+
+                $available = implode(', ', $available);
+                $unavailable = implode(', ', $unavailable);
+
                 return [
+                    'id' => $room->id,
                     'room' => $room->name,
-                    'available' => implode(', ', $available),
-                    'unavailable' => implode(', ', $unavailable),
+                    'available' => $available,
+                    'unavailable' => $unavailable,
                 ];
             });
 
-            // Har bir bino uchun qaytariladigan ma'lumotlar
             return [
                 'id' => $building->id,
                 'name' => $building->name,
@@ -204,9 +181,18 @@ class BuildingController extends Controller
             ];
         });
 
-        // JSON javobini qaytarish
-        return Response::json($result);
+        return response()->json($result);
     }
+
+
+
+
+
+
+
+
+
+
 
 
 

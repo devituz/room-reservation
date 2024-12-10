@@ -10,12 +10,9 @@ class NotificationController extends Controller
 {
     public function getNotifications()
     {
-        // Get only the notifications where 'is_approved' is 'approved'
         $notifications = Notification::where('is_approved', 'approved')->get();
 
-        // Transform the notifications into the required format
         $events = $notifications->map(function ($notification) {
-            // Define colors based on the 'is_color' field
             $colors = [
                 'red' => '#b81212',      // Qizil rang
                 'yellow' => '#f9c100',   // Sariq rang

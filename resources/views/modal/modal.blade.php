@@ -104,23 +104,12 @@
                     <textarea class="form-control" id="event-desc" name="edesc"></textarea>
                 </div>
 
-                <!-- CAPTCHA -->
-                <div id="captcha-container" style="display: none;"> <!-- Initially hidden -->
-                    <div class="form-group">
-                        <label for="captcha">What is <span id="captcha-question"></span>?</label>
-                        <input type="text" class="form-control" id="captcha-input" name="captcha">
-                        <small id="captcha-error" class="text-danger" style="display:none;">Incorrect answer. Please try
-                            again.</small>
-                    </div>
-                </div>
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="finish-modal" style="display: none;">Submit</button>
+                <button type="button" class="btn btn-primary" id="finish-modal">Submit</button>
                 <button type="button" class="btn btn-primary" id="close-modal" data-bs-dismiss="modal">Close</button>
-                <div id="loading-message" style="display: none;">
-                    <span>Loading, please wait...</span>
-                </div>
+
             </div>
         </div>
     </div>

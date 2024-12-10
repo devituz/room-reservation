@@ -10,7 +10,7 @@ $(document).ready(function () {
         },
         events: function (info, successCallback, failureCallback) {
             $.ajax({
-                url: 'http://172.24.25.252:8080/api/notifications', // Your API endpoint to get events
+                url: '/notifications',
                 method: 'GET',
                 success: function (response) {
                     var events = response.events.map(function (event) {
@@ -146,12 +146,15 @@ function updateRoomTable(buildingId) {
     rooms.forEach(room => {
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td class="room-cell">Select</td>
-            <td>${room.room}</td>
-            <td>${room.available}</td>
-            <td>${room.unavailable}</td>
-        `;
+                <td class="room-cell">Select</td>
+                <td>${room.room}</td>
+                <td>${room.available}</td>
+                <td>${room.unavailable}</td>
+            `;
         row.querySelector(".room-cell").addEventListener("click", function () {
+            console.log("Building Select ID:", document.getElementById("building-select").value); // Logs the building-select value
+            console.log("Room Select ID:", room.id); // Logs the Room ID from the room data
+
             openModal(building, room);
         });
         tableBody.appendChild(row);
@@ -162,7 +165,9 @@ function updateRoomTable(buildingId) {
 function openModal(building, room) {
     const modal = new bootstrap.Modal(document.getElementById('modal-view-event-final'));
     document.querySelector('#modal-building-name').value = building.name;
-    document.querySelector('#modal-room-number').value = room.room;
+    const roomNumberElement = document.querySelector('#modal-room-number');
+    roomNumberElement.value = room.room;
+    roomNumberElement.setAttribute('data-room-id', room.id); // Store the room ID
     modal.show();
 }
 
@@ -174,3 +179,100 @@ document.getElementById("building-select").addEventListener("change", function (
 
 // Populate buildings on page load
 window.onload = populateBuildings;
+
+// Submit button functionality
+document.getElementById("finish-modal").addEventListener("click", function () {
+    const eventDate = document.getElementById("event-date").value;
+    const buildingId = document.getElementById("building-select").value; // Get the selected building ID
+    const roomId = document.getElementById("modal-room-number").getAttribute('data-room-id'); // Get the room ID from data attribute
+    const eventStartTime = document.getElementById("event-start-time").value;
+    const eventEndTime = document.getElementById("event-end-time").value;
+    const fullname = document.getElementById("fullname").value;
+    const phoneNumber = document.getElementById("phone-number").value;
+    const email = document.getElementById("email").value;
+    const eventName = document.getElementById("event-name").value;
+    const eventDesc = document.getElementById("event-desc").value;
+
+    const submitButton = document.getElementById('finish-modal');
+    const closeButton = document.getElementById('close-modal');
+    const modalFooter = document.querySelector('.modal-footer');
+
+    // Hide buttons and show waiting message
+    submitButton.style.display = 'none';
+    closeButton.style.display = 'none';
+
+    const waitingMessage = document.createElement('span');
+    waitingMessage.id = 'waiting-message';
+    waitingMessage.textContent = 'Please wait...';
+    waitingMessage.style.fontSize = '16px';
+    waitingMessage.style.color = 'gray';
+    modalFooter.appendChild(waitingMessage);
+
+    // Building the payload for the request
+    const eventData = {
+        _token: $('meta[name="csrf-token"]').attr('content'),
+        event_date: eventDate,
+        event_start_time: eventStartTime,
+        event_end_time: eventEndTime,
+        building_id: buildingId, // Send the selected building ID
+        room_id: roomId,         // Send the selected room ID
+        fullname: fullname,
+        phone_number: phoneNumber,
+        email: email,
+        event_name: eventName,
+        event_description: eventDesc
+    };
+
+
+    $.ajax({
+        url: '/notifications',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(eventData),
+        success: function (response) {
+            console.log("Event created successfully:", response);
+
+            waitingMessage.remove();
+            document.getElementById('modal-view-event-final').style.display = 'none';
+            $("#modal-view-event-final").modal('hide');
+
+            Swal.fire({
+                title: 'Success!',
+                text: 'Your data has been submitted.',
+                icon: 'success'
+            }).then(() => {
+                location.reload();
+            });
+            // Reset buttons
+            submitButton.style.display = 'inline-block';
+            closeButton.style.display = 'inline-block';
+        },
+        error: function (xhr, status, error) {
+            waitingMessage.remove();
+
+            let errorMessage = 'There was an error adding the event!';
+
+            try {
+                const response = JSON.parse(xhr.responseText);
+                errorMessage = response.error || errorMessage;
+            } catch (e) {
+                console.error("Failed to parse error response:", e);
+            }
+
+            Swal.fire({
+                title: 'Error!',
+                text: errorMessage,
+                icon: 'error'
+            }).then(() => {
+                location.reload();
+            });
+            // Reset buttons
+            submitButton.style.display = 'inline-block';
+            closeButton.style.display = 'inline-block';
+        }
+    });
+
+});
+
+
+
