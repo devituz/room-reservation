@@ -46,9 +46,11 @@ class BuildingController extends Controller
             ], 422);
         }
 
-        // Check if an approved notification with the same event date and time already exists
+        // Check if an approved notification with the same event date, time, building, and room already exists
         $existingNotification = Notification::where('event_date', $request->input('event_date'))
             ->where('is_approved', 'approved') // Check only approved notifications
+            ->where('building_id', $request->input('building_id')) // Check for the same building
+            ->where('room_id', $request->input('room_id')) // Check for the same room
             ->where(function ($query) use ($request) {
                 // Check if the new event's time range overlaps with any existing event's time range
                 $query->where(function ($query) use ($request) {
@@ -59,12 +61,14 @@ class BuildingController extends Controller
             ->first();
 
         if ($existingNotification) {
-            // If an approved notification already exists for the given date and time, return an error response
+            // If an approved notification already exists for the given date, time, building, and room, return an error response
             return response()->json([
-                'error' => 'An approved event already exists in the schedule for this date (' . $request->input('event_date') .
+                'error' => 'An approved event already exists in the schedule for this building (' . $request->input('building_id') .
+                    ') and room (' . $request->input('room_id') . ') on this date (' . $request->input('event_date') .
                     ') and time (' . $request->input('event_start_time') . ' - ' . $request->input('event_end_time') . ').',
             ], 409); // Conflict error
         }
+
 
 
         // Store the validated data in the database
@@ -160,6 +164,25 @@ class BuildingController extends Controller
                     }
                 }
 
+                // Agar bo'sh vaqtlar ro'yxati bo'sh bo'lsa, butun kun band deb ko'rsatsin
+                if (empty($available) && empty($unavailable)) {
+                    $available[] = '';
+                }
+
+                // 08:00 - 20:00 vaqt oralig'i butunlay band bo'lsa, available ga 'band' deb ko'rsatish
+                $totalUnavailableTime = collect($unavailable)->reduce(function ($carry, $item) {
+                    $times = explode(' - ', $item);
+                    $start = Carbon::parse($times[0]);
+                    $end = Carbon::parse($times[1]);
+                    // Yig'ish uchun add() emas, diffInMinutes ishlatiladi
+                    return $carry + $end->diffInMinutes($start);  // Bu yerda diffInMinutes ishlatiladi
+                }, 0);
+
+                // Agar band bo'lgan vaqt 720 minut (yani 08:00 - 20:00) bo'lsa, "band" deb belgilash
+                if ($totalUnavailableTime >= 720) {
+                    $available = [''];
+                }
+
                 $available = array_unique($available);
                 $unavailable = array_unique($unavailable);
 
@@ -183,6 +206,8 @@ class BuildingController extends Controller
 
         return response()->json($result);
     }
+
+
 
 
 

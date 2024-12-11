@@ -57,13 +57,13 @@
                     <!-- Row 2: Values -->
                     <div class="form-row">
                         <div class="form-group col">
-                            <input type="text" class="form-control" name="date" id="event-date" value="2024-12-03" readonly>
+                            <input type="text" class="form-control" name="date" id="event-date" value="event-date" readonly>
                         </div>
                         <div class="form-group col">
-                            <input type="text" class="form-control" id="modal-building-name" value="Building 1" readonly>
+                            <input type="text" class="form-control" id="modal-building-name" value="modal-building-name" readonly>
                         </div>
                         <div class="form-group col">
-                            <input type="text" class="form-control" id="modal-room-number" value="45" readonly>
+                            <input type="text" class="form-control" id="modal-room-number" value="modal-room-number" readonly>
                         </div>
                     </div>
                 </div>

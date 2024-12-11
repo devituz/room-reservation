@@ -183,8 +183,8 @@ window.onload = populateBuildings;
 // Submit button functionality
 document.getElementById("finish-modal").addEventListener("click", function () {
     const eventDate = document.getElementById("event-date").value;
-    const buildingId = document.getElementById("building-select").value; // Get the selected building ID
-    const roomId = document.getElementById("modal-room-number").getAttribute('data-room-id'); // Get the room ID from data attribute
+    const buildingId = document.getElementById("building-select").value;
+    const roomId = document.getElementById("modal-room-number").getAttribute('data-room-id');
     const eventStartTime = document.getElementById("event-start-time").value;
     const eventEndTime = document.getElementById("event-end-time").value;
     const fullname = document.getElementById("fullname").value;
@@ -192,12 +192,14 @@ document.getElementById("finish-modal").addEventListener("click", function () {
     const email = document.getElementById("email").value;
     const eventName = document.getElementById("event-name").value;
     const eventDesc = document.getElementById("event-desc").value;
+    const buildingName = document.getElementById("building-select").options[document.getElementById("building-select").selectedIndex].text;
+
+    const roomName = document.getElementById("modal-room-number").value;
 
     const submitButton = document.getElementById('finish-modal');
     const closeButton = document.getElementById('close-modal');
     const modalFooter = document.querySelector('.modal-footer');
 
-    // Hide buttons and show waiting message
     submitButton.style.display = 'none';
     closeButton.style.display = 'none';
 
@@ -208,21 +210,19 @@ document.getElementById("finish-modal").addEventListener("click", function () {
     waitingMessage.style.color = 'gray';
     modalFooter.appendChild(waitingMessage);
 
-    // Building the payload for the request
     const eventData = {
         _token: $('meta[name="csrf-token"]').attr('content'),
         event_date: eventDate,
         event_start_time: eventStartTime,
         event_end_time: eventEndTime,
-        building_id: buildingId, // Send the selected building ID
-        room_id: roomId,         // Send the selected room ID
+        building_id: buildingId,
+        room_id: roomId,
         fullname: fullname,
         phone_number: phoneNumber,
         email: email,
         event_name: eventName,
         event_description: eventDesc
     };
-
 
     $.ajax({
         url: '/notifications',
@@ -243,9 +243,15 @@ document.getElementById("finish-modal").addEventListener("click", function () {
             }).then(() => {
                 location.reload();
             });
-            // Reset buttons
+
             submitButton.style.display = 'inline-block';
             closeButton.style.display = 'inline-block';
+
+            // sendEmail({
+            //     to: email,
+            //     title: "Event Created Successfully",
+            //     body: `Dear ${fullname},\n\nYour event "${eventName}" has been successfully created and scheduled for ${eventDate} from ${eventStartTime} to ${eventEndTime}.\n\nEvent Details:\n- Building: ${buildingName}\n- Room: ${roomName}\n- Full Name: ${fullname}\n- Phone Number: ${phoneNumber}\n- Event Name: ${eventName}\n- Event Description: ${eventDesc}\n\nCurrently, the event is pending approval from the administrators. You will be notified via email once it is confirmed.\n\nThank you!`
+            // });
         },
         error: function (xhr, status, error) {
             waitingMessage.remove();
@@ -259,20 +265,57 @@ document.getElementById("finish-modal").addEventListener("click", function () {
                 console.error("Failed to parse error response:", e);
             }
 
+            // If error occurs, send detailed information about the input fields that caused the error
+            // const errorDetails = `
+            //     Event Date: ${eventDate}
+            //     Building: ${buildingName}
+            //     Room: ${roomName}
+            //     Start Time: ${eventStartTime}
+            //     End Time: ${eventEndTime}
+            //     Full Name: ${fullname}
+            //     Phone Number: ${phoneNumber}
+            //     Email: ${email}
+            //     Event Name: ${eventName}
+            //     Event Description: ${eventDesc}
+            // `;
+
             Swal.fire({
                 title: 'Error!',
-                text: errorMessage,
+                text: `${errorMessage}`,
                 icon: 'error'
             }).then(() => {
                 location.reload();
             });
-            // Reset buttons
+
             submitButton.style.display = 'inline-block';
             closeButton.style.display = 'inline-block';
+
+            // sendEmail({
+            //     to: email,
+            //     title: "Error in Event Submission",
+            //     body: `An error occurred while submitting the event "${eventName}". Error details: ${errorMessage}\n\nEvent Data:\n${errorDetails}`
+            // });
         }
     });
 
+    // function sendEmail(data) {
+    //     $.ajax({
+    //         url: '/send-email',
+    //         method: 'POST',
+    //         contentType: 'application/json',
+    //         data: JSON.stringify({
+    //             _token: $('meta[name="csrf-token"]').attr('content'),
+    //             to: data.to,
+    //             title: data.title,
+    //             body: data.body
+    //         }),
+    //         success: function(response) {
+    //             console.log("Email sent successfully:", response);
+    //         },
+    //         error: function(xhr, status, error) {
+    //             console.error("Error sending email:", error);
+    //         }
+    //     });
+    // }
 });
-
-
 

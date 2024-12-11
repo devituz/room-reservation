@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\EmailController;
 use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
@@ -22,3 +23,4 @@ Route::get('/', function () {
 Route::post('/notifications-by-date', [BuildingController::class, 'getNotificationsByDate'])->name('modal.modal');
 Route::post('/notifications', [BuildingController::class, 'store'])->name('modal.store');
 Route::get('/notifications', [NotificationController::class, 'getNotifications']);
+Route::post('/send-email', [EmailController::class, 'sendEmail']);

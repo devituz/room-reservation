@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Mail\RoomApproved;
 use Filament\Tables\Actions\Action;
 
 use App\Filament\Resources\NotificationResource\Pages;
@@ -19,6 +20,7 @@ use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class NotificationResource extends Resource
@@ -120,6 +122,26 @@ class NotificationResource extends Resource
                             'is_approved' => 'approved',
                             'is_color' => $data['is_color'],
                         ]);
+
+                        $notification = (object) [
+                            'event_name' => $record->event_name,
+                            'event_date' => $record->event_date,
+                            'event_start_time' => $record->event_start_time,
+                            'event_end_time' => $record->event_end_time,
+                            'fullname' => $record->fullname,
+                            'building_name' => $record->building->name, // Building name from related model
+                            'room_name' => $record->room->name, // Room name from related model
+                            'phone_number' => $record->phone_number,
+                            'email' => $record->email,
+                            'event_description' => $record->event_description,
+                            'is_approved' => $record->is_approved,
+
+                        ];
+
+
+
+                        // Send the RoomApproved email with both parameters: notification and type
+                        Mail::to($record->email)->send(new RoomApproved($notification, 'approved'));
                     })
                     // Hide approve button if already approved or rejected
                     ->visible(fn ($record) => $record->is_approved === 'pending'),
@@ -130,6 +152,24 @@ class NotificationResource extends Resource
                     ->icon('heroicon-o-x-mark')
                     ->action(function ($record) {
                         $record->update(['is_approved' => 'rejected']);
+
+                        $notification = (object) [
+                            'event_name' => $record->event_name,
+                            'event_date' => $record->event_date,
+                            'event_start_time' => $record->event_start_time,
+                            'event_end_time' => $record->event_end_time,
+                            'fullname' => $record->fullname,
+                            'building_name' => $record->building->name,
+                            'room_name' => $record->room->name,
+                            'phone_number' => $record->phone_number,
+                            'email' => $record->email,
+                            'event_description' => $record->event_description,
+                            'is_approved' => $record->is_approved,
+                        ];
+
+
+                        // Send the RoomApproved email with 'rejected' type
+                        Mail::to($record->email)->send(new RoomApproved($notification, 'rejected'));
                     })
                     // Hide reject button if already approved or rejected
                     ->visible(fn ($record) => $record->is_approved === 'pending'),
